@@ -101,6 +101,7 @@ terraformer import aci --help
     * `span_source_group`
         * `span_sourcedestination_group_match_label`
     * `end_point_retention_policy`
+    * `bfd_interface_policy`
 * `vpc_explicit_protection_group`
 * `l3_domain_profile`
 * `vmm_domain`
@@ -166,6 +167,8 @@ terraformer import aci --help
 * `l3_interface_policy`
 * `mgmt_preference`
 * `fabric_node_control`
+* `managed_node_connectivity_group`
+* `spine_switch_policy_group`
 #### Attribute filters
 
 Attribute filters allow filtering across different resource types by their attributes.
