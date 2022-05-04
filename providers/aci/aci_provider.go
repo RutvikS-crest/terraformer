@@ -345,10 +345,10 @@ func (p ACIProvider) GetResourceConnections() map[string]map[string][]string {
 			"vrf":                        []string{"vrf_dn", "id"},
 			"bgp_address_family_context": []string{"bgp_address_family_context_dn", "id"},
 		},
-		"aci_mgmt_zone": {
-			"aci_managed_node_connectivity_group": []string{"aci_managed_node_connectivity_group_dn", "id"},
+		"mgmt_zone": {
+			"managed_node_connectivity_group": []string{"managed_node_connectivity_group_dn", "id"},
 		},
-		"aci_recurring_window": {
+		"recurring_window": {
 			"trigger_schedular": []string{"trigger_schedular_dn", "id"},
 		},
 	}
@@ -586,5 +586,8 @@ func (p *ACIProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"saml_provider":                            &SAMLProviderGenerator{},
 		"tacacs_accounting_destination":            &TACACSDestinationGenerator{},
 		"vrf_to_bgp_address_family_context":        &BGPAddressFamilyContextPolicyGenerator{},
+		"endpoint_loop_protection":                 &EPLoopProtectionPolicyGenerator{},
+		"endpoint_controls":                        &EndpointControlPolicyGenerator{},
+		"endpoint_ip_aging_profile":                &IPAgingPolicyGenerator{},
 	}
 }
