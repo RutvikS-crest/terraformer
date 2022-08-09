@@ -9,11 +9,15 @@ import (
 
 const EPGToContractClass = "fvRsProv"
 
+var missTargetEPGToContractResource []string
+
 type EPGToContractGenerator struct {
 	ACIService
 }
 
 func (a *EPGToContractGenerator) InitResources() error {
+	const epgToContractResourceName = "aci_epg_to_contract"
+
 	if clientImpl == nil {
 		_, err := a.createClient()
 		if err != nil {
@@ -40,25 +44,30 @@ func (a *EPGToContractGenerator) InitResources() error {
 
 	for i := 0; i < EPGToContractCount; i++ {
 		EPGToContractDN := stripQuotes(EPGToContractCont.S("imdata").Index(i).S(EPGToContractClass, "attributes", "dn").String())
-		if filterChildrenDn(EPGToContractDN, client.parentResource) != "" {
-			resource := terraformutils.NewResource(
-				EPGToContractDN,
-				resourceNamefromDn(EPGToContractClass, (EPGToContractDN), i),
-				"aci_epg_to_contract",
-				"aci",
-				map[string]string{
-					"contract_type": "provider",
-				},
-				[]string{
-					"annotation",
-					"match_t",
-					"prio",
-					"description",
-				},
-				map[string]interface{}{},
-			)
-			resource.SlowQueryRequired = true
-			a.Resources = append(a.Resources, resource)
+
+		if checkTarget(epgToContractResourceName, EPGToContractCont.S("imdata").Index(i).S(EPGToContractClass, "attributes")) {
+			if filterChildrenDn(EPGToContractDN, client.parentResource) != "" {
+				resource := terraformutils.NewResource(
+					EPGToContractDN,
+					resourceNamefromDn(EPGToContractClass, (EPGToContractDN), i),
+					epgToContractResourceName,
+					"aci",
+					map[string]string{
+						"contract_type": "provider",
+					},
+					[]string{
+						"annotation",
+						"match_t",
+						"prio",
+						"description",
+					},
+					map[string]interface{}{},
+				)
+				resource.SlowQueryRequired = true
+				a.Resources = append(a.Resources, resource)
+			}
+		} else {
+			missTargetEPGToContractResource = append(missTargetEPGToContractResource, fmt.Sprintf("%s:%s", epgToContractResourceName, EPGToContractDN))
 		}
 	}
 	// Consumer
@@ -78,27 +87,32 @@ func (a *EPGToContractGenerator) InitResources() error {
 
 	for i := 0; i < EPGToContractCount; i++ {
 		EPGToContractDN := stripQuotes(EPGToContractCont.S("imdata").Index(i).S("fvRsCons", "attributes", "dn").String())
-		if filterChildrenDn(EPGToContractDN, client.parentResource) != "" {
-			resource := terraformutils.NewResource(
-				EPGToContractDN,
-				resourceNamefromDn("fvRsCons", GetMOName(EPGToContractDN), i+provCount),
-				"aci_epg_to_contract",
-				"aci",
-				map[string]string{
-					"contract_type": "consumer",
-				},
-				[]string{
-					"annotation",
-					"match_t",
-					"prio",
-					"description",
-				},
-				map[string]interface{}{},
-			)
-			resource.SlowQueryRequired = true
-			a.Resources = append(a.Resources, resource)
+
+		if checkTarget(epgToContractResourceName, EPGToContractCont.S("imdata").Index(i).S("fvRsCons", "attributes")) {
+			if filterChildrenDn(EPGToContractDN, client.parentResource) != "" {
+				resource := terraformutils.NewResource(
+					EPGToContractDN,
+					resourceNamefromDn("fvRsCons", GetMOName(EPGToContractDN), i+provCount),
+					epgToContractResourceName,
+					"aci",
+					map[string]string{
+						"contract_type": "consumer",
+					},
+					[]string{
+						"annotation",
+						"match_t",
+						"prio",
+						"description",
+					},
+					map[string]interface{}{},
+				)
+				resource.SlowQueryRequired = true
+				a.Resources = append(a.Resources, resource)
+			}
+		} else {
+			missTargetEPGToContractResource = append(missTargetEPGToContractResource, fmt.Sprintf("%s:%s", epgToContractResourceName, EPGToContractDN))
 		}
 	}
-
+	printMissTarget(missTargetEPGToContractResource)
 	return nil
 }

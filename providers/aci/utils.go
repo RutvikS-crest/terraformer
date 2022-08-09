@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -61,4 +62,34 @@ func replaceSpecialCharsDn(dn string) string {
 
 func resourceNamefromDn(className, dn string, i int) string {
 	return fmt.Sprintf("%s_%s_%d", className, replaceSpecialCharsDn(GetMOName(dn)), i)
+}
+
+var resourceRequiredFieldMap = map[string][]string{
+	"aci_epg_to_contract": {"tDn"},
+}
+
+func checkTarget(rName string, container *container.Container) bool {
+	return checkRequiredFields(rName, container)
+}
+
+func checkRequiredFields(rName string, container *container.Container) bool {
+	attrs := resourceRequiredFieldMap[rName]
+	for _, attr := range attrs {
+		res := G(container, attr)
+		if res == "" || res == "{}" {
+			return false
+		}
+	}
+	return true
+
+}
+
+func printMissTarget(missTargetResources []string) {
+	resources := missTargetResources
+	if len(resources) > 0 {
+		log.Println("[WARNING]\n The following resources have not being imported due to 'miss-target'")
+		for _, resource := range resources {
+			fmt.Printf("   - %s\n", resource)
+		}
+	}
 }
