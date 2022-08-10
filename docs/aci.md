@@ -280,8 +280,38 @@ Or alternatively
    ACI_URL = Cisco_APIC_url
    ACI_CERT_NAME = Cisco_APIC_user_certificate_name
    ACI_PRIVATE_KEY = Cisco_APIC_user_private_key
-```
+``` 
 Note: If above environment variables have not been set, use `--username`, `--password` and `--base-url` options.
+
+#### To migrate to Terrafrom > 0.13 the following steps are required  
+
+i. Replace the provider  
+```
+terraform state replace-provider -auto-approve "registry.terraform.io/-/aci" "registry.terraform.io/ciscodevnet/aci"
+```
+ii. Edit the provider.tf and replace
+```
+terraform {
+    required_providers {
+        aci = {
+            version = "~> 2.3.0"
+        }
+    } 
+}
+```
+With 
+```
+terraform {
+    required_providers {
+        aci = {
+            source = "CiscoDevNet/aci"
+            version = "2.3.0"
+        }
+    }
+}
+
+```    
+
 
 From Releases:
 
